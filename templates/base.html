@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/styles.css">
+    <title>{% block title %} {% endblock %}</title>
+</head>
+<body>
+    <header>
+            <a href="{{url_for('home') }}"><img src="../static/images/logo.png" class="logo"></a>
+        <nav>
+            <form method="POST" class="search-form">
+                <input type="text" class="search-bar" name="search">
+                <input type="submit" class="search" value="SEARCH" name="submit">
+            </form>
+            <li>REGISTER</li>
+            <li>LOGIN</li>
+            <LI>YOUR LISTS</LI>
+        </nav>
+    </header>
+
+    <section id="main">
+        {% block content %}
+        
+        {% endblock %}
+    </section>
+
+    <footer></footer>
+    
+</body>
+</html>

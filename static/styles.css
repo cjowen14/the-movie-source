@@ -1,0 +1,147 @@
+/* ALL PAGES */
+*{
+    margin: 0;
+    background-color: rgb(20, 20, 20);
+    color: white;
+}
+
+header{
+    /* background-color: rgb(50, 50, 50); */
+    width: 100%;
+    height: 300px;
+    margin-bottom: 75px;
+}
+
+footer{
+    width: 100%;
+    height: 150px;
+}
+
+nav,li{
+    /* background-color: rgb(50, 50, 50); */
+    float: right;
+    margin-top: 110px;
+    margin-right: 50px;
+    list-style-type: none;
+    font-size: 20pt;
+    
+}
+
+#main{
+    margin-left: 15%;
+    margin-right: 15%;
+    height: 100%
+}
+
+.logo{
+    width: 300px;
+    height: 300px;
+}
+
+.logo-div{
+    margin-right: 0px;
+    margin-left: 0px;
+    display: flex;
+}
+
+/* HOME PAGE AND SEARCH RESULTS */
+
+.home{
+    text-align: center;
+}
+
+.search-results{
+    text-align: center;
+}
+
+
+
+.movie-card{
+    width: 300px;
+    height: 400px;
+    background-color: aqua;
+    display: inline-block;
+    margin-right: 67px;
+    margin-bottom: 150px;
+}
+
+.search-form{
+    float: left;
+    margin-top: 100px;
+    margin-right: 300px;
+}
+
+.search-bar{
+    background-color: white;
+    height: 100%;
+    width: 500px;
+    color: black;
+}
+
+.search{
+    height: 37px;
+    width: 100px;
+    margin-left: 20px;
+    background-color: aqua;
+    color: black;
+    font-size: 14pt;
+}
+
+
+.poster{
+    width: 100%;
+    height: 100%;
+}
+
+.results-heading{
+    margin-top: 25px;
+    margin-bottom: 125px;
+}
+
+/* MOVIE INFO */
+
+.movie-info{
+    text-align: center;
+}
+
+#movie-title{
+    font-size: 50pt;
+}
+
+.info-poster{
+    width: 50%;
+    height: 300px;
+}
+
+
+
+/* LOGIN FORM */
+.login-form{
+    width: 500px;
+    height: 400px;
+    display: inline-block;
+}
+
+.login-form,input{
+    height: 35px;
+    width: 300px;
+    background-color: white;
+    color: rgb(20, 20, 20);
+    font-size: 16pt;
+}
+
+.login-form,label{
+    font-size: 28pt;
+    background-color: rgb(20, 20, 20);
+}
+
+.login-center{
+    text-align: center;
+    display: block;
+}
+
+.login-center,h1{
+    font-size: 50pt;
+    margin-bottom: 50px;
+}
+

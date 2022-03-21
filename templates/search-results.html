@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %} The Movie Source {% endblock %}
+
+{% block content %}
+    <div class="search-results">
+        <h1 class="results-heading">Search Results For: {{ user_search }}</h1>
+        {% for movie in results %}
+            {% if movie['poster_path'] %}
+                <div class="movie-card">
+                    <h2>{{ movie['title'] }}</h2>
+                    <a href="/movie-info/{{ movie['id'] }}"><img src="https://image.tmdb.org/t/p/original/{{ movie['poster_path'] }}" class="poster"></a>
+                    <h2>Average Rating: {{ movie['vote_average'] }}</h2>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+
+
+
+
+{% endblock %}
