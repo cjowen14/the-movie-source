@@ -11,13 +11,18 @@
     <header>
             <a href="{{url_for('home') }}"><img src="../static/images/logo.png" class="logo"></a>
         <nav>
-            <form method="POST" class="search-form">
-                <input type="text" class="search-bar" name="search">
-                <input type="submit" class="search" value="SEARCH" name="submit">
-            </form>
-            <li>REGISTER</li>
-            <li>LOGIN</li>
-            <LI>YOUR LISTS</LI>
+            
+            {% if session %}
+                <li>Hello, {{session['name']}}</li>
+                <a href="{{ url_for('process_logout') }}"><li>Logout</li></a>
+                <a href="#"><li>Your List</li></a>
+                <a href="#"><li>Your Ratings</li></a>
+                <a href="#"><li>Your Reviews</li></a>
+            {% else %}
+                <a href="{{ url_for('show_register') }}"><li>Register</li></a>
+                <a href="{{ url_for('show_login') }}"><li>Login</li></a>
+            {% endif %}
+            
         </nav>
     </header>
 

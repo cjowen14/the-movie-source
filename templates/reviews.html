@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %} The Movie Source {% endblock %}
+
+{% block content %}
+
+<div class="reviews-div">
+    {% if reviews %}
+        <table class="reviews-table">
+            <tr>
+                <th class="reviews-header">User_ID</th>
+                <th class="reviews-header">Review</th>
+            </tr>
+            {% for r in reviews %}
+            <tr>
+                <td class="reviews-data">{{ r.user_id }}</td>
+                <td class="reviews-data">{{ r.review }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>This movie has no reviews</h2>
+    {% endif %}
+</div>
+
+
+
+{% endblock %}

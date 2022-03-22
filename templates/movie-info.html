@@ -4,12 +4,13 @@
 
 {% block content %}
 
+    <h1 id="movie-title">{{ results['title'] }}</h1>
+    <img src="https://image.tmdb.org/t/p/original/{{ results['poster_path'] }}" class="info-poster">
+
     <div class="movie-info">
-        <h1 id="movie-title">{{ results['title'] }}</h1>
-        <img src="https://image.tmdb.org/t/p/original/{{ results['backdrop_path'] }}" class="info-poster">
             <h2 class="info-header">Release Date:</h2><h3 class="info-info">{{ results['release_date'] }}</h3><br>
             <h2 class="info-header">Director:</h2><h3 class="info-info">{{ director[0] }}</h3><br>
-            <h2 class="info-header">Studio:</h2><h3 class="info-info">
+            <h2 class="info-header">Studios:</h2><h3 class="info-info">
                 {% for company in results['production_companies'] %}
                     {{ company['name'] }}, 
                 {% endfor %}
@@ -25,8 +26,20 @@
                 {% endfor %}
             </h3><br>
             <h2 class="info-header">Runtime:</h2><h3 class="info-info">{{ results['runtime'] }} minutes</h3><br>
-            <h2 class="info-header">Average Rating:</h2><h3 class="info-info">{{ results['vote_average'] }}</h3><br>
-            <h2 class="info-header">Synopsis:</h2><h3 class="info-info">{{ results['overview'] }}</h3>   
+            
+            <h2 class="info-header">Synopsis:</h2><h3 class="info-info">{{ results['overview'] }}</h3>  
+    </div>
+
+    <div class="info-ratings">
+        <h2 class="info-average">Average Rating:</h2><h3 class="info-rating">{{ results['vote_average'] }}</h3><br>
+        {% if session %}
+            <a href="/reviews/{{ results['id'] }}"><button class="info-buttons">See All Reviews</button></a>
+            <button class="info-buttons">Add to Your List</button>
+            <button class="info-buttons">Rate Movie</button>
+            <button class="info-buttons">Write A Review</button>
+        {% else %}
+            <a href="/reviews/{{ results['id'] }}"><button class="info-buttons">See All Reviews</button></a>
+        {% endif %}
     </div>
 
 
