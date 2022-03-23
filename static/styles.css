@@ -206,3 +206,30 @@ nav,li{
 
 
 
+/* WRITE REVIEW */
+
+.write-review{
+    text-align: center;
+}
+
+.write-review > h2{
+    margin-bottom: 50px;
+    font-size: 40pt;
+}
+
+#review-text{
+    background-color: white;
+    color:rgb(14, 14, 14);
+    font-size: 20pt;
+    width: 800px;
+    height: 350px;
+}
+
+.review-submit{
+    width: 200px;
+    height: 50px;
+    font-size: 28pt;
+}
+
+
+

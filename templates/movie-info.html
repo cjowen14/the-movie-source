@@ -34,9 +34,10 @@
         <h2 class="info-average">Average Rating:</h2><h3 class="info-rating">{{ results['vote_average'] }}</h3><br>
         {% if session %}
             <a href="/reviews/{{ results['id'] }}"><button class="info-buttons">See All Reviews</button></a>
-            <button class="info-buttons">Add to Your List</button>
-            <button class="info-buttons">Rate Movie</button>
-            <button class="info-buttons">Write A Review</button>
+            <a href="/fav-list/{{ results['id'] }}"><button class="info-buttons">Add to Your List</button></a>
+            <a href="/rate-movie/{{ results['id'] }}"><button class="info-buttons">Rate Movie</button></a>
+            <a href="/write-review/{{ results['id'] }}"><button class="info-buttons">Write A Review</button></a>
+            
         {% else %}
             <a href="/reviews/{{ results['id'] }}"><button class="info-buttons">See All Reviews</button></a>
         {% endif %}

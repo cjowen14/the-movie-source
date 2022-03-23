@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, flash, session, url_for, redirect
 import requests
+import os
 from flask_sqlalchemy import SQLAlchemy
 import secret
 import psycopg2
@@ -28,6 +29,7 @@ class User(db.Model):
         return f"{self.user_first_name} {self.user_last_name}"
 
 
+## CREATE RATINGS CLASS
 class Ratings(db.Model):
     __tablename__ = "ratings"
 
@@ -40,6 +42,7 @@ class Ratings(db.Model):
         return f"User {self.user_id} rated {self.rating_score}"
 
 
+## CREATE REVIEWS CLASS
 class Reviews(db.Model):
     __tablename__ = "reviews"
 
@@ -51,6 +54,69 @@ class Reviews(db.Model):
 
     def __repr__(self):
         return f"{self.review}"
+
+
+## CREATE FAVORITES CLASS
+class Favorites(db.Model):
+    __tablename__ = "favorites_list"
+
+    favorites_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    movie_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.user_id))
+
+    def __repr__(self):
+        return f"User {self.user_id} added {self.movie_id}"
+
+
+## DISPLAY AND PROCESS LOGIN, LOGOUT, AND REGISTRATION
+@app.route('/login')
+def show_login():
+    return render_template('login.html')
+
+@app.route('/login', methods=["POST"])
+def process_login():
+    email = request.form['email']
+    password = hash(request.form['password'])
+    users = User.query.all()
+    for user in users:
+        if user.email == email and hash(user.password) == password:
+            print("You are logged in!")
+            session['id'] = user.user_id
+            session['email'] = email
+            session['name'] = user.user_first_name
+            print(session['name'])
+        elif user.email == email and not hash(user.password) == password:
+            print("Incorrect Password")
+        else:
+            print("Email not found")
+    return redirect(url_for('home'))
+
+@app.route('/logout')
+def process_logout():
+    session.pop('email', None)
+    session.pop('name', None)
+    session.pop('id', None)
+    return redirect(url_for('home'))
+
+@app.route('/register')
+def show_register():
+    return render_template('register.html')
+
+@app.route('/register', methods=["POST"])
+def process_register():
+    first_name = request.form['first']
+    last_name = request.form['last']
+    email = request.form['email']
+    password = request.form['password']
+    users = User.query.all()
+    for u in users:
+        if email == u.email:
+            print("Email already exists")
+            return redirect(url_for('show_register'))
+    new_user = User(user_first_name=first_name, user_last_name=last_name, email=email, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+    return redirect(url_for('home'))
 
 
 ## GET POPULAR MOVIES AND DISPLAY ON HOME PAGE
@@ -74,16 +140,15 @@ def search_results():
     user_search = request.form['search']
     return redirect(url_for('search_results2',user_search=user_search))
 
-@app.route('/movie-info/<movie_id>', methods=["POST"])
-def search_results_B(movie_id):
-    user_search = request.form['search']
-    return redirect(url_for('search_results2',user_search=user_search))
+# @app.route('/movie-info/<movie_id>', methods=["POST"])
+# def search_results_B(movie_id):
+#     user_search = request.form['search']
+#     return redirect(url_for('search_results2',user_search=user_search))
 
 @app.route('/search-results/<user_search>', methods=["POST"])
 def search_results_C(user_search):
     user_search = request.form['search']
     return redirect(url_for('search_results2',user_search=user_search))
-
 
 
 ## DISPLAY SEARCH RESULTS
@@ -123,58 +188,7 @@ def movie_info(movie_id):
     return render_template('movie-info.html', results=results, actors=actors, director=director)
 
 
-
-
-
-@app.route('/login')
-def show_login():
-    return render_template('login.html')
-
-@app.route('/login', methods=["POST"])
-def process_login():
-    email = request.form['email']
-    password = hash(request.form['password'])
-
-    users = User.query.all()
-    for user in users:
-        if user.email == email and hash(user.password) == password:
-            print("You are logged in!")
-            session['email'] = email
-            session['name'] = user.user_first_name
-            print(session['name'])
-        elif user.email == email and not hash(user.password) == password:
-            print("Incorrect Password")
-        else:
-            print("Email not found")
-    
-    return redirect(url_for('home'))
-
-
-@app.route('/logout')
-def process_logout():
-    session.pop('email', None)
-    session.pop('name', None)
-    return redirect(url_for('home'))
-
-
-@app.route('/register')
-def show_register():
-    return render_template('register.html')
-
-@app.route('/register', methods=["POST"])
-def process_register():
-    first_name = request.form['first']
-    last_name = request.form['last']
-    email = request.form['email']
-    password = request.form['password']
-
-    new_user = User(user_first_name=first_name, user_last_name=last_name, email=email, password=password)
-    db.session.add(new_user)
-    db.session.commit()
-    return redirect(url_for('home'))
-
-
-
+## VIEW ALL REVIEWS FOR MOVIE
 @app.route('/reviews/<movie_id>')
 def see_reviews(movie_id):
     reviews = Reviews.query.all()
@@ -185,9 +199,83 @@ def see_reviews(movie_id):
     return render_template('reviews.html', reviews=review_list)
 
 
+## WRITE REVIEW FOR MOVIE
+@app.route('/write-review/<movie_id>', methods=["GET"])
+def write_review(movie_id):
+    api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}")
+    movie = api_res.json()
+    return render_template('write-review.html', movie=movie)
 
 
+## ADD REVIEW TO DATABASE
+@app.route('/write-review/<movie_id>', methods=["POST"])
+def submit_review(movie_id):
+    review = request.form['review']
+    rating = request.form['rating']
+    new_rating = Ratings(user_id=session['id'], movie_id=movie_id, rating_score=rating)
+    db.session.add(new_rating)
+    db.session.commit()
+    new_review = Reviews(user_id=session['id'], movie_id=movie_id, rating_id=new_rating.rating_id, review=review)
+    db.session.add(new_review)
+    db.session.commit()
+    return redirect(url_for('see_reviews',movie_id=movie_id))
 
+
+## GIVE JUST A RATING FOR A MOVIE
+@app.route('/rate-movie/<movie_id>', methods=["GET"])
+def rate_movie(movie_id):
+    return render_template('rate.html')
+
+
+## ADD THE RATING TO THE DBpyt
+@app.route('/rate-movie/<movie_id>', methods=["POST"])
+def submit_rating(movie_id):
+    rating = request.form['rating']
+    new_rating = Ratings(user_id=session['id'], movie_id=movie_id, rating_score=rating)
+    db.session.add(new_rating)
+    db.session.commit()
+    return redirect(url_for('movie_info', movie_id=movie_id))
+
+
+## ADD MOVIE TO FAVORITES LIST
+@app.route('/fav-list/<movie_id>')
+def add_fav(movie_id):
+    new_fav = Favorites(movie_id=movie_id, user_id=session['id'])
+    db.session.add(new_fav)
+    db.session.commit()
+    return redirect(url_for('movie_info', movie_id=movie_id))
+
+
+## VIEW ALL USER'S RATINGS
+@app.route('/your-ratings')
+def your_ratings():
+    ratings = Ratings.query.all()
+    results = {}
+    titles={}
+    for rating in ratings:
+        if rating.user_id == session['id']:
+            movie = rating.movie_id
+            results[movie] = rating.rating_score
+    for movie in results:
+        title = requests.get(f"https://api.themoviedb.org/3/movie/{movie}?api_key={api_key}&language=en-US").json()['title']
+        titles[title] = results[movie]
+    return render_template('your-ratings.html', titles=titles)
+
+
+## VIEW ALL USER'S REVIEWS
+@app.route('/your-reviews')
+def your_reviews():
+    reviews= Reviews.query.all()
+    results = {}
+    titles={}
+    for review in reviews:
+        if review.user_id == session['id']:
+            movie = review.movie_id
+            results[movie] = review.review
+    for movie in results:
+        title = requests.get(f"https://api.themoviedb.org/3/movie/{movie}?api_key={api_key}&language=en-US").json()['title']
+        titles[title] = results[movie]
+    return render_template('your-reviews.html', titles=titles)
 
 if __name__ == '__main__':
     app.run()

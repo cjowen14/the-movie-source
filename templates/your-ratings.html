@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %} Your Ratings {% endblock %}
+
+{% block content %}
+
+    {% for t in titles %}
+        <h2>{{ t }}:  {{ titles[t] }}/10</h2>
+        <br>
+    {% endfor %}
+
+
+
+
+{% endblock %}

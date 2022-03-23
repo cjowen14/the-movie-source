@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %} Write a Review {% endblock %}
+
+{% block content %}
+
+    <div class="write-review">
+        <h2>Write a review for: {{ movie['title'] }}</h2>
+        <form method="POST">
+            <textarea name="review" id="review-text" cols="100" rows="20"></textarea>
+            <br>
+            <div class="radios">
+                <h2>1</h2>
+                <input type="radio" value="1" name="rating" class="radio-button">
+                <h2>2</h2>
+                <input type="radio" value="2" name="rating" class="radio-button">
+                <h2>3</h2>
+                <input type="radio" value="3" name="rating" class="radio-button">
+                <h2>4</h2>
+                <input type="radio" value="4" name="rating" class="radio-button">
+                <h2>5</h2>
+                <input type="radio" value="5" name="rating" class="radio-button">
+                <h2>6</h2>
+                <input type="radio" value="6" name="rating" class="radio-button">
+                <h2>7</h2>
+                <input type="radio" value="7" name="rating" class="radio-button">
+                <h2>8</h2>
+                <input type="radio" value="8" name="rating" class="radio-button">
+                <h2>9</h2>
+                <input type="radio" value="9" name="rating" class="radio-button">
+                <h2>10</h2>
+                <input type="radio" value="10" name="rating" class="radio-button">
+            </div>
+                
+            <br>
+            <input type="submit" class="review-submit">
+        </form>
+    </div>
+    
+
+{% endblock %}
