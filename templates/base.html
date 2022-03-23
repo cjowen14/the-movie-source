@@ -15,7 +15,7 @@
             {% if session %}
                 <li>Hello, {{session['name']}}</li>
                 <a href="{{ url_for('process_logout') }}"><li>Logout</li></a>
-                <a href="#"><li>Your List</li></a>
+                <a href="{{ url_for('your_list') }}"><li>Your List</li></a>
                 <a href="{{ url_for('your_ratings') }}"><li>Your Ratings</li></a>
                 <a href="{{ url_for('your_reviews') }}"><li>Your Reviews</li></a>
             {% else %}

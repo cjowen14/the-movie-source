@@ -9,7 +9,7 @@ header{
     background-color: rgb(30, 30, 30);
     width: 100%;
     height: 200px;
-    margin-bottom: 100px;
+    margin-bottom: 40px;
 }
 
 header,a{
@@ -113,25 +113,16 @@ nav,li{
     height: 500px;
     float: left;
     margin-top: 10px;
+    margin-right: 50px;
 }
 
 .movie-info{
-    margin-left: 400px;
+    margin-left: 750px;
 }
 
 .info-ratings{
-    margin-top: 50px;
-}
-
-.info-average{
-    display: inline-block;
-    margin-left: 65px;
-}
-
-.info-rating{
-    display: inline-block;
-    margin-left: 10px;
-    font-size: 20pt;
+    margin-top: 0px;
+    float: left;
 }
 
 .info-buttons{
@@ -143,6 +134,32 @@ nav,li{
     margin-top: 20px;
     border: 2px solid aqua;
 }
+
+.service-logo{
+    width: 55px;
+    height: 55px;
+}
+
+.not-available{
+    width: 150px;
+}
+
+.streaming{
+    width: 350px;
+    text-align: center;
+    margin-right: 50px;
+    margin-top: 20px;
+}
+
+.streaming>h2{
+    margin-top: 20px;
+}
+
+.service-div{
+    margin-top: 10px;
+}
+
+
 
 
 
@@ -231,5 +248,25 @@ nav,li{
     font-size: 28pt;
 }
 
+
+
+.your-list{
+    text-align: center;
+}
+
+.your-list>h2{
+    font-size: 40pt;
+    margin-bottom: 50px;
+}
+
+.list-button{
+
+    width: 160px;
+    height: 40px;
+    font-size: 12pt;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: 2px solid aqua;
+}
 
 

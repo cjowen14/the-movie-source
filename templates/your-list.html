@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %} Your List {% endblock %}
+
+{% block content %}
+
+    <div class="your-list">
+        <h2>Your List!</h2>
+        {% for movie in movies %}
+            <div class="movie-card">
+                <a href="/movie-info/{{ movie['id'] }}"><img src="https://image.tmdb.org/t/p/original/{{ movie['poster_path'] }}" class="poster"></a>
+                <h2>{{ movie['title'] }}</h2>
+                <h2>Average Rating: {{ movie['vote_average'] }}</h2>
+                <a href="/delete-fav/{{ movie['id'] }}"><button class="list-button">Remove From List</button></a>
+            </div>
+        {% endfor %}
+    </div>
+    
+
+
+
+
+{% endblock %}

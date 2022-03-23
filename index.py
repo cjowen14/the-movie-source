@@ -84,12 +84,13 @@ def process_login():
             session['id'] = user.user_id
             session['email'] = email
             session['name'] = user.user_first_name
-            print(session['name'])
+            return redirect(url_for('home'))
         elif user.email == email and not hash(user.password) == password:
             print("Incorrect Password")
-        else:
-            print("Email not found")
-    return redirect(url_for('home'))
+            return redirect(url_for('show_login'))
+        
+    print("Email not found")        
+    return redirect(url_for('show_login'))
 
 @app.route('/logout')
 def process_logout():
@@ -184,8 +185,30 @@ def movie_info(movie_id):
     for person in credits['crew']:
         if person['department'] == 'Directing':
             director.append(person['name'])
+
+    ## GET STREAMING SERVICES
+    api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key={api_key}").json()
+    try:
+        buy = api_res['results']['US']['buy']
+    except:
+        buy = []
+    try:
+        rent = api_res['results']['US']['rent']
+    except:
+        rent = []
+    try:
+        stream = api_res['results']['US']['flatrate']
+    except:
+        stream = []
     
-    return render_template('movie-info.html', results=results, actors=actors, director=director)
+    ## GET LIST OF FAVORITES AND CHECK TO SEE IF MOVIE IS IN USER'S LIST
+    favorites = Favorites.query.all()
+    favorited = 0
+    for fav in favorites:
+        if str(fav.movie_id) == str(movie_id):
+            favorited = movie_id
+            return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, buy=buy, rent=rent, stream=stream)
+    return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, buy=buy, rent=rent, stream=stream)
 
 
 ## VIEW ALL REVIEWS FOR MOVIE
@@ -243,7 +266,15 @@ def add_fav(movie_id):
     new_fav = Favorites(movie_id=movie_id, user_id=session['id'])
     db.session.add(new_fav)
     db.session.commit()
-    return redirect(url_for('movie_info', movie_id=movie_id))
+    return redirect(url_for('your_list'))
+
+## REMOVE MOVIE FROM FAVORITES LIST
+@app.route('/delete-fav/<movie_id>')
+def del_fav(movie_id):
+    del_fav = Favorites.query.filter_by(movie_id=movie_id).first()
+    db.session.delete(del_fav)
+    db.session.commit()
+    return redirect(url_for('your_list'))
 
 
 ## VIEW ALL USER'S RATINGS
@@ -276,6 +307,26 @@ def your_reviews():
         title = requests.get(f"https://api.themoviedb.org/3/movie/{movie}?api_key={api_key}&language=en-US").json()['title']
         titles[title] = results[movie]
     return render_template('your-reviews.html', titles=titles)
+
+
+## VIEW USER'S LIST
+@app.route('/your-list')
+def your_list():
+    favorites = Favorites.query.all()
+    list = []
+    for movie in favorites:
+        if movie.user_id == session['id']:
+            fav = requests.get(f"https://api.themoviedb.org/3/movie/{movie.movie_id}?api_key={api_key}&language=en-US").json()
+            list.append(fav)
+    s = slice(0,24)
+    for movie in list:
+        if len(movie['title'])>25:
+            movie['title'] = movie['title'][s] + '..'
+    return render_template('your-list.html', movies=list)
+
+
+
+
 
 if __name__ == '__main__':
     app.run()
