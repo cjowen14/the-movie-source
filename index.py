@@ -2,18 +2,19 @@ from flask import Flask, render_template, request, flash, session, url_for, redi
 import requests
 import os
 from flask_sqlalchemy import SQLAlchemy
+from passlib.hash import sha256_crypt
 import secret
 import psycopg2
 app = Flask(__name__)
 db = SQLAlchemy()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = secret.uri
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.app = app
 db.init_app(app)
 
-app.secret_key = secret.secret_key
-api_key = secret.api_key
+app.secret_key = os.getenv('SECRET_KEY')
+api_key = os.getenv('API_KEY')
 
 ## CREATE USER CLASS
 class User(db.Model):
@@ -76,20 +77,20 @@ def show_login():
 @app.route('/login', methods=["POST"])
 def process_login():
     email = request.form['email']
-    password = hash(request.form['password'])
+    password = request.form['password']
     users = User.query.all()
     for user in users:
-        if user.email == email and hash(user.password) == password:
-            print("You are logged in!")
+        if user.email == email and sha256_crypt.verify(password, user.password):
+            flash("You are logged in!")
             session['id'] = user.user_id
             session['email'] = email
             session['name'] = user.user_first_name
             return redirect(url_for('home'))
-        elif user.email == email and not hash(user.password) == password:
-            print("Incorrect Password")
+        elif user.email == email and not sha256_crypt.encrypt(user.password) == password:
+            flash("Incorrect Password")
             return redirect(url_for('show_login'))
         
-    print("Email not found")        
+    flash("Email not found")        
     return redirect(url_for('show_login'))
 
 @app.route('/logout')
@@ -97,6 +98,7 @@ def process_logout():
     session.pop('email', None)
     session.pop('name', None)
     session.pop('id', None)
+    flash("You have been successfully logged out!")
     return redirect(url_for('home'))
 
 @app.route('/register')
@@ -108,15 +110,19 @@ def process_register():
     first_name = request.form['first']
     last_name = request.form['last']
     email = request.form['email']
-    password = request.form['password']
+    password = sha256_crypt.encrypt(request.form['password'])
     users = User.query.all()
     for u in users:
         if email == u.email:
-            print("Email already exists")
+            flash("Email already exists")
             return redirect(url_for('show_register'))
     new_user = User(user_first_name=first_name, user_last_name=last_name, email=email, password=password)
     db.session.add(new_user)
     db.session.commit()
+    flash(f"Welcome {first_name}!!")
+    session['id'] = new_user.user_id
+    session['email'] = email
+    session['name'] = new_user.user_first_name
     return redirect(url_for('home'))
 
 
@@ -189,26 +195,33 @@ def movie_info(movie_id):
     ## GET STREAMING SERVICES
     api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key={api_key}").json()
     try:
-        buy = api_res['results']['US']['buy']
-    except:
-        buy = []
-    try:
-        rent = api_res['results']['US']['rent']
-    except:
-        rent = []
-    try:
         stream = api_res['results']['US']['flatrate']
     except:
         stream = []
+    # try:
+    #     buy = api_res['results']['US']['buy']
+    # except:
+    #     buy = []
+    # try:
+    #     rent = api_res['results']['US']['rent']
+    # except:
+    #     rent = []
     
+
     ## GET LIST OF FAVORITES AND CHECK TO SEE IF MOVIE IS IN USER'S LIST
     favorites = Favorites.query.all()
+    ratings = Ratings.query.all()
+    user_rating = ''
+    if session:
+        for rating in ratings:
+            if str(rating.user_id) == str(session['id']) and str(rating.movie_id) == str(movie_id):
+                user_rating = rating.rating_score
     favorited = 0
     for fav in favorites:
-        if str(fav.movie_id) == str(movie_id):
+        if str(fav.movie_id) == str(movie_id) and str(fav.user_id) == str(session['id']):
             favorited = movie_id
-            return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, buy=buy, rent=rent, stream=stream)
-    return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, buy=buy, rent=rent, stream=stream)
+            return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, stream=stream, user_rating=user_rating)
+    return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, stream=stream, user_rating=user_rating)
 
 
 ## VIEW ALL REVIEWS FOR MOVIE
@@ -247,10 +260,12 @@ def submit_review(movie_id):
 ## GIVE JUST A RATING FOR A MOVIE
 @app.route('/rate-movie/<movie_id>', methods=["GET"])
 def rate_movie(movie_id):
-    return render_template('rate.html')
+    api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}")
+    movie = api_res.json()
+    return render_template('rate.html', movie=movie)
 
 
-## ADD THE RATING TO THE DBpyt
+## ADD THE RATING TO THE DB
 @app.route('/rate-movie/<movie_id>', methods=["POST"])
 def submit_rating(movie_id):
     rating = request.form['rating']

@@ -8,31 +8,44 @@
     <title>{% block title %} {% endblock %}</title>
 </head>
 <body>
-    <header>
-            <a href="{{url_for('home') }}"><img src="../static/images/logo.png" class="logo"></a>
+    <header>           
         <nav>
-            
-            {% if session %}
-                <li>Hello, {{session['name']}}</li>
+            {% if session['email'] %}
                 <a href="{{ url_for('process_logout') }}"><li>Logout</li></a>
                 <a href="{{ url_for('your_list') }}"><li>Your List</li></a>
                 <a href="{{ url_for('your_ratings') }}"><li>Your Ratings</li></a>
                 <a href="{{ url_for('your_reviews') }}"><li>Your Reviews</li></a>
+                <li>Hello, {{session['name']}}</li>
             {% else %}
                 <a href="{{ url_for('show_register') }}"><li>Register</li></a>
                 <a href="{{ url_for('show_login') }}"><li>Login</li></a>
             {% endif %}
-            
         </nav>
     </header>
 
+    
+
     <section id="main">
+        <a href="{{url_for('home') }}"><img src="../static/images/logo2.png" class="logo"></a> 
+        <h2 class="flash-message">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        </h2>
+
+        
         {% block content %}
         
         {% endblock %}
     </section>
 
     <footer></footer>
+
+    
     
 </body>
 </html>

@@ -5,7 +5,7 @@
 {% block content %}
 
     <div class="your-list">
-        <h2>Your List!</h2>
+        <h2>{{ session['name'] }}'s List!</h2>
         {% for movie in movies %}
             <div class="movie-card">
                 <a href="/movie-info/{{ movie['id'] }}"><img src="https://image.tmdb.org/t/p/original/{{ movie['poster_path'] }}" class="poster"></a>
