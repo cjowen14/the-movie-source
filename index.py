@@ -3,7 +3,6 @@ import requests
 import os
 from flask_sqlalchemy import SQLAlchemy
 from passlib.hash import sha256_crypt
-import secret
 import psycopg2
 app = Flask(__name__)
 db = SQLAlchemy()
