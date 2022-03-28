@@ -61,7 +61,10 @@ nav,li{
     text-align: center;
 }
 
-
+.other-results{
+    font-size: 25pt;
+    margin-right: 25px;
+}
 
 .movie-card{
     width: 300px;
@@ -185,8 +188,9 @@ nav,li{
 
 .service-div{
     margin-top: 10px;
-
 }
+
+
 
 
 
@@ -248,6 +252,11 @@ nav,li{
     font-weight: bolder;
     text-align: center;
     padding: 20px;
+}
+
+.reviews-title{
+    text-align: center;
+    margin-top: 25px;
 }
 
 

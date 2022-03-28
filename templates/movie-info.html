@@ -4,7 +4,12 @@
 
 {% block content %}
 
-    
+    <div class="search-results">
+        <form method="POST" class="search-form">
+            <input type="text" class="search-bar" name="search">
+            <input type="submit" class="search" value="SEARCH" name="submit">
+        </form>
+    </div>
     <div class="info-div">
 
     
@@ -77,18 +82,31 @@
             <h2 class="info-header">Director:</h2><h3 class="info-info">{{ director[0] }}</h3>
             <h2 class="info-header">Studios:</h2><h3 class="info-info">
                 {% for company in results['production_companies'] %}
-                    {{ company['name'] }}, 
+                    {% if results['production_companies'].index(company) < results['production_companies']|length-1 %}
+                        {{ company['name'] }}, 
+                    {% else %}
+                        {{ company['name'] }}
+                    {% endif %}
                 {% endfor %}
             </h3>
             <h2 class="info-header">Genres:</h2><h3 class="info-info">
                 {% for genre in results['genres'] %}
-                    {{ genre['name'] }}, 
+                    {% if results['genres'].index(genre) < results['genres']|length-1 %}
+                        {{ genre['name'] }}, 
+                    {% else %}
+                        {{ genre['name'] }}
+                    {% endif %}
                 {% endfor %}
             </h3>
             <h2 class="info-header">Starring:</h2><h3 class="info-info">
                 {% for actor in actors %}
-                    {{ actor }}, 
+                    {% if actors.index(actor) < actors|length-1 %}
+                        {{ actor }}, 
+                    {% else %}
+                        {{ actor }}
+                    {% endif %}
                 {% endfor %}
+                
             </h3>
             <h2 class="info-header">Runtime:</h2><h3 class="info-info">{{ results['runtime'] }} minutes</h3>
             

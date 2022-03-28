@@ -4,17 +4,19 @@
 
 {% block content %}
 
+
+<h1 class="reviews-title">Reviews for: {{ movie['title'] }}</h1>
 <div class="reviews-div">
     {% if reviews %}
         <table class="reviews-table">
             <tr>
-                <th class="reviews-header">User_ID</th>
+                <th class="reviews-header">Name</th>
                 <th class="reviews-header">Review</th>
             </tr>
             {% for r in reviews %}
             <tr>
-                <td class="reviews-data">{{ r.user_id }}</td>
-                <td class="reviews-data">{{ r.review }}</td>
+                <td class="reviews-data">{{ r }}</td>
+                <td class="reviews-data">{{ reviews[r] }}</td>
             </tr>
             {% endfor %}
         </table>

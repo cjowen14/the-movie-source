@@ -15,6 +15,9 @@ db.init_app(app)
 app.secret_key = os.getenv('SECRET_KEY')
 api_key = os.getenv('API_KEY')
 
+results_list = []
+search_results_list = []
+
 ## CREATE USER CLASS
 class User(db.Model):
     __tablename__ = "users"
@@ -129,15 +132,32 @@ def process_register():
 @app.route('/', methods=["GET"])
 @app.route('/home', methods=["GET"])
 def home():
-    api_res = requests.get(f"https://api.themoviedb.org/3/movie/popular?api_key={api_key}&language=en-US&page=1")
-    results = api_res.json()['results']
+    ## GET 10 PAGES OF POPULAR MOVIES
+    page = 1
+    global results_list
+    results_list = []
+    while page <= 10:
+        api_res = requests.get(f"https://api.themoviedb.org/3/movie/popular?api_key={api_key}&language=en-US&page={page}").json()['results']
+        results_list.append(api_res)
+        page += 1
+
     ## TRIM TITLE TO FIT ON ONE LINE
     s = slice(0,24)
-    for movie in results:
+    for movie in results_list[0]:
         if len(movie['title'])>25:
             movie['title'] = movie['title'][s] + '..'
-    return render_template('home.html', results=results)
 
+    return render_template('home.html', results=results_list[0], page=1)
+
+
+## PROCESS NEXT OR PREVIOUS PAGE OF POPULAR MOVIES
+@app.route('/home-<page>')
+def next_page(page):
+    s = slice(0,24)
+    for movie in results_list[int(page) - 1]:
+        if len(movie['title'])>25:
+            movie['title'] = movie['title'][s] + '..'
+    return render_template('home.html', results=results_list[int(page) - 1], page=int(page))
 
 ## PROCESS SEARCH RESULTS FOR EACH POSSIBLE PAGE
 @app.route('/', methods=["POST"])
@@ -146,10 +166,10 @@ def search_results():
     user_search = request.form['search']
     return redirect(url_for('search_results2',user_search=user_search))
 
-# @app.route('/movie-info/<movie_id>', methods=["POST"])
-# def search_results_B(movie_id):
-#     user_search = request.form['search']
-#     return redirect(url_for('search_results2',user_search=user_search))
+@app.route('/movie-info/<movie_id>', methods=["POST"])
+def search_results_B(movie_id):
+    user_search = request.form['search']
+    return redirect(url_for('search_results2',user_search=user_search))
 
 @app.route('/search-results/<user_search>', methods=["POST"])
 def search_results_C(user_search):
@@ -160,14 +180,31 @@ def search_results_C(user_search):
 ## DISPLAY SEARCH RESULTS
 @app.route('/search-results/<user_search>')
 def search_results2(user_search):
-    api_res = requests.get(f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&language=en-US&page=1&include_adult=false&query={user_search}")
-    results = api_res.json()['results']
+    global search_results_list
+    search_results_list = []
+    pages = int(requests.get(f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&language=en-US&page=1&include_adult=false&query={user_search}").json()['total_pages'])
+    counter = 1
+    while counter <= pages:
+        api_res = requests.get(f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&language=en-US&page={counter}&include_adult=false&query={user_search}").json()['results']
+        search_results_list.append(api_res)
+        counter += 1
     ## TRIM TITLE TO FIT ON ONE LINE
     s = slice(0,24)
-    for movie in results:
+    for movie in search_results_list[0]:
         if len(movie['title'])>25:
             movie['title'] = movie['title'][s] + '..'
-    return render_template('search-results.html', user_search=user_search, results=results)
+    return render_template('search-results.html', user_search=user_search, results=search_results_list[0], page=1, total_pages=pages)
+
+
+## PROCESS NEXT OR PREVIOUS PAGE OF SEARCH RESULTS
+@app.route('/search-results/<user_search>-<page>-<total_pages>')
+def next_search(user_search, page, total_pages):
+    print(page)
+    s = slice(0,24)
+    for movie in search_results_list[int(page) - 1]:
+        if len(movie['title'])>25:
+            movie['title'] = movie['title'][s] + '..'
+    return render_template('search-results.html', user_search=user_search, results=search_results_list[int(page) - 1], page=int(page), total_pages=int(total_pages))
 
 
 ## SHOW MOVIE INFORMATION
@@ -205,13 +242,13 @@ def movie_info(movie_id):
     #     rent = api_res['results']['US']['rent']
     # except:
     #     rent = []
-    
 
     ## GET LIST OF FAVORITES AND CHECK TO SEE IF MOVIE IS IN USER'S LIST
     favorites = Favorites.query.all()
     ratings = Ratings.query.all()
     user_rating = ''
     favorited = 0
+    print(len(actors))
     if session:
         for rating in ratings:
             if str(rating.user_id) == str(session['id']) and str(rating.movie_id) == str(movie_id):
@@ -227,11 +264,21 @@ def movie_info(movie_id):
 @app.route('/reviews/<movie_id>')
 def see_reviews(movie_id):
     reviews = Reviews.query.all()
-    review_list = []
+    users = User.query.all()
+    review_dict = {}
+    final_dict = {}
+    api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}")
+    movie = api_res.json()
+    ##  GET REVIEWS FOR MOVIE
     for review in reviews:
         if str(review.movie_id) == str(movie_id):
-            review_list.append(review)
-    return render_template('reviews.html', reviews=review_list)
+            review_dict[review.user_id] = review.review
+    ## GET USER NAMES ASSOCIATED WITH EACH REVIEW
+    for review in review_dict:
+        for user in users:
+            if review == user.user_id:
+                final_dict[user.user_first_name + " " + user.user_last_name] = review_dict[review]
+    return render_template('reviews.html', reviews=final_dict, movie=movie)
 
 
 ## WRITE REVIEW FOR MOVIE

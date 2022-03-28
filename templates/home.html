@@ -19,7 +19,18 @@
             </div>
         {% endif %}
     {% endfor %}
+    <br>
+    {% if page > 1 %}
+        <a href="/home-{{ page - 1 }}" class="other-results">PREVIOUS</a>
+    {% endif %}
+    {% if page < 10 %}
+        <a href="/home-{{ page + 1 }}" class="other-results">NEXT</a>
+    {% endif %}
     </div>
+
+    
+
+    
 
 
 
