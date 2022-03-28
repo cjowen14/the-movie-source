@@ -211,15 +211,15 @@ def movie_info(movie_id):
     favorites = Favorites.query.all()
     ratings = Ratings.query.all()
     user_rating = ''
+    favorited = 0
     if session:
         for rating in ratings:
             if str(rating.user_id) == str(session['id']) and str(rating.movie_id) == str(movie_id):
                 user_rating = rating.rating_score
-    favorited = 0
-    for fav in favorites:
-        if str(fav.movie_id) == str(movie_id) and str(fav.user_id) == str(session['id']):
-            favorited = movie_id
-            return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, stream=stream, user_rating=user_rating)
+        for fav in favorites:
+            if str(fav.movie_id) == str(movie_id) and str(fav.user_id) == str(session['id']):
+                favorited = movie_id
+                return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, stream=stream, user_rating=user_rating)
     return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, stream=stream, user_rating=user_rating)
 
 
