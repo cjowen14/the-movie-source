@@ -11,13 +11,16 @@
         </form>
         <h1 class="results-heading">Search Results For: {{ user_search }}</h1>
         {% for movie in results %}
-
-                <div class="movie-card">
-                    <a href="/movie-info/{{ movie['id'] }}"><img src="https://image.tmdb.org/t/p/original/{{ movie['poster_path'] }}" class="poster"></a>
-                    <h2>{{ movie['title'] }}</h2>
+            <div class="movie-card">
+            {% if movie['poster_path'] %}
+                <a href="/movie-info/{{ movie['id'] }}"><img src="https://image.tmdb.org/t/p/original/{{ movie['poster_path'] }}" class="poster"></a>
+            {% else %}
+            <a href="/movie-info/{{ movie['id'] }}"><img src="../static/images/no_photo.png" class="poster"></a>
+            {% endif %}
+                    <h2 class="movie-title">{{ movie['title'] }}</h2>
                     <h2>Average Rating: {{ movie['vote_average'] }}</h2>
                 </div>
-
+            
         {% endfor %}
         <br>
         {% if page > 1 %}

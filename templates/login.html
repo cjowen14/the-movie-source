@@ -6,16 +6,17 @@
 
     <div class="login-center">
         <h1>Login</h1>
-        <form method="POST" class="login-form">
-            <label for="email">Email:</label>
-            <br>
-            <input type="text" name="email">
-            <br>
-            <label for="password">Password:</label>
-            <br>
-            <input type="password" name="password">
-            <br>
-            <input type="submit" class="login-button" value="Login">
+        <form method="POST" action="" class="login-form">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.email.label }}
+                {{ form.email(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(class="form-control") }}
+            </div>
+            {{ form.submit(class="login-button") }}
         </form>
     </div>
     

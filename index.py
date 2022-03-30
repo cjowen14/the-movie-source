@@ -1,9 +1,15 @@
+from operator import methodcaller
+from types import MethodType
 from flask import Flask, render_template, request, flash, session, url_for, redirect
 import requests
 import os
 from flask_sqlalchemy import SQLAlchemy
 from passlib.hash import sha256_crypt
 from sqlalchemy import create_engine
+from pprint import pprint
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SubmitField, PasswordField
+from wtforms.validators import DataRequired, Length, email_validator
 app = Flask(__name__)
 db = SQLAlchemy()
 
@@ -15,85 +21,98 @@ db.init_app(app)
 app.secret_key = os.getenv('SECRET_KEY')
 api_key = os.getenv('API_KEY')
 
+## GLOBAL VARIABLES
 results_list = []
 search_results_list = []
 
 ## CREATE USER CLASS
 class User(db.Model):
     __tablename__ = "users"
-
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_first_name = db.Column(db.String(255))
     user_last_name = db.Column(db.String(255))
     email = db.Column(db.String(255))
     password = db.Column(db.String(255))
-
     def __repr__(self):
         return f"{self.user_first_name} {self.user_last_name}"
-
 
 ## CREATE RATINGS CLASS
 class Ratings(db.Model):
     __tablename__ = "ratings"
-
     rating_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(User.user_id))
     movie_id = db.Column(db.Integer)
     rating_score = db.Column(db.Integer)
-
     def __repr__(self):
         return f"User {self.user_id} rated {self.rating_score}"
-
 
 ## CREATE REVIEWS CLASS
 class Reviews(db.Model):
     __tablename__ = "reviews"
-
     review_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(User.user_id))
     movie_id = db.Column(db.Integer)
     rating_id = db.Column(db.Integer, db.ForeignKey(Ratings.rating_id))
     review = db.Column(db.Text)
-
     def __repr__(self):
         return f"{self.review}"
-
 
 ## CREATE FAVORITES CLASS
 class Favorites(db.Model):
     __tablename__ = "favorites_list"
-
     favorites_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     movie_id = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey(User.user_id))
-
     def __repr__(self):
         return f"User {self.user_id} added {self.movie_id}"
 
+## REGISTRATION FORM CLASS
+class RegisterForm(FlaskForm):
+    user_first_name = StringField("First Name", validators=[DataRequired("data is required!")])
+    user_last_name = StringField("Last Name", validators=[DataRequired("data is required!")])
+    email = StringField("Email", validators=[DataRequired("data is required!")])
+    password = PasswordField("Password", validators=[DataRequired("data is required!"), Length(min=5, max=20, message="Password must be between 5-20 characters long.")])
+    submit = SubmitField("Register")
+    def __repr__(self):
+        return f"{self.user_first_name} {self.user_last_name} {self.email} {self.password}"
+
+## LOGIN FORM CLASS
+class LoginForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired("data is required!")])
+    password = PasswordField("Password", validators=[DataRequired("data is required!")])
+    submit = SubmitField("Login")
+    def __repr__(self):
+        return f"{self.email} {self.password}"
+
+## REVIEW FORM CLASS
+class ReviewForm(FlaskForm):
+    review = TextAreaField("Review", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
 
 ## DISPLAY AND PROCESS LOGIN, LOGOUT, AND REGISTRATION
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def show_login():
-    return render_template('login.html')
-
-@app.route('/login', methods=["POST"])
-def process_login():
-    email = request.form['email']
-    password = request.form['password']
-    users = User.query.all()
-    for user in users:
-        if user.email == email and sha256_crypt.verify(password, user.password):
-            flash("You are logged in!")
-            session['id'] = user.user_id
-            session['email'] = email
-            session['name'] = user.user_first_name
-            return redirect(url_for('home'))
-        elif user.email == email and not sha256_crypt.encrypt(user.password) == password:
-            flash("Incorrect Password")
-            return redirect(url_for('show_login'))
-        
-    flash("Email not found")        
-    return redirect(url_for('show_login'))
+    form = LoginForm()
+    if request.method == 'GET':
+        return render_template('login.html', form=form)
+    if form.validate_on_submit:
+        email = form.email.data
+        password = form.password.data
+        users = User.query.all()
+        for user in users:
+            if user.email == email and sha256_crypt.verify(password, user.password):
+                flash(f"Welcome back {user.user_first_name}!")
+                session['id'] = user.user_id
+                session['email'] = email
+                session['name'] = user.user_first_name
+                return redirect(url_for('home'))
+            elif user.email == email and not sha256_crypt.encrypt(user.password) == password:
+                flash("Incorrect Password")
+                return redirect(url_for('show_login'))
+            
+        flash("Email not found")        
+        return redirect(url_for('show_login'))
 
 @app.route('/logout')
 def process_logout():
@@ -103,29 +122,32 @@ def process_logout():
     flash("You have been successfully logged out!")
     return redirect(url_for('home'))
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def show_register():
-    return render_template('register.html')
-
-@app.route('/register', methods=["POST"])
-def process_register():
-    first_name = request.form['first']
-    last_name = request.form['last']
-    email = request.form['email']
-    password = sha256_crypt.encrypt(request.form['password'])
-    users = User.query.all()
-    for u in users:
-        if email == u.email:
-            flash("Email already exists")
-            return redirect(url_for('show_register'))
-    new_user = User(user_first_name=first_name, user_last_name=last_name, email=email, password=password)
-    db.session.add(new_user)
-    db.session.commit()
-    flash(f"Welcome {first_name}!!")
-    session['id'] = new_user.user_id
-    session['email'] = email
-    session['name'] = new_user.user_first_name
-    return redirect(url_for('home'))
+    form = RegisterForm()
+    if request.method == 'GET':
+        return render_template('register.html', form=form)
+    if form.validate_on_submit():
+        first_name = form.user_first_name.data
+        last_name = form.user_last_name.data
+        email = form.email.data
+        password = sha256_crypt.encrypt(form.password.data)
+        users = User.query.all()
+        for u in users:
+            if email == u.email:
+                flash("Email already exists")
+                return redirect(url_for('show_register'))
+        new_user = User(user_first_name=first_name, user_last_name=last_name, email=email, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash(f"Welcome {first_name}!!")
+        session['id'] = new_user.user_id
+        session['email'] = email
+        session['name'] = new_user.user_first_name
+        return redirect(url_for('home'))
+    else:
+        flash("{}".format(form.errors), "danger")
+        return render_template("register.html")
 
 
 ## GET POPULAR MOVIES AND DISPLAY ON HOME PAGE
@@ -140,24 +162,23 @@ def home():
         api_res = requests.get(f"https://api.themoviedb.org/3/movie/popular?api_key={api_key}&language=en-US&page={page}").json()['results']
         results_list.append(api_res)
         page += 1
-
     ## TRIM TITLE TO FIT ON ONE LINE
-    s = slice(0,24)
+    s = slice(0,23)
     for movie in results_list[0]:
-        if len(movie['title'])>25:
+        if len(movie['title'])>24:
             movie['title'] = movie['title'][s] + '..'
-
     return render_template('home.html', results=results_list[0], page=1)
 
 
 ## PROCESS NEXT OR PREVIOUS PAGE OF POPULAR MOVIES
 @app.route('/home-<page>')
 def next_page(page):
-    s = slice(0,24)
+    s = slice(0,23)
     for movie in results_list[int(page) - 1]:
-        if len(movie['title'])>25:
+        if len(movie['title'])>24:
             movie['title'] = movie['title'][s] + '..'
     return render_template('home.html', results=results_list[int(page) - 1], page=int(page))
+
 
 ## PROCESS SEARCH RESULTS FOR EACH POSSIBLE PAGE
 @app.route('/', methods=["POST"])
@@ -189,9 +210,9 @@ def search_results2(user_search):
         search_results_list.append(api_res)
         counter += 1
     ## TRIM TITLE TO FIT ON ONE LINE
-    s = slice(0,24)
+    s = slice(0,23)
     for movie in search_results_list[0]:
-        if len(movie['title'])>25:
+        if len(movie['title'])>24:
             movie['title'] = movie['title'][s] + '..'
     return render_template('search-results.html', user_search=user_search, results=search_results_list[0], page=1, total_pages=pages)
 
@@ -200,9 +221,9 @@ def search_results2(user_search):
 @app.route('/search-results/<user_search>-<page>-<total_pages>')
 def next_search(user_search, page, total_pages):
     print(page)
-    s = slice(0,24)
+    s = slice(0,23)
     for movie in search_results_list[int(page) - 1]:
-        if len(movie['title'])>25:
+        if len(movie['title'])>24:
             movie['title'] = movie['title'][s] + '..'
     return render_template('search-results.html', user_search=user_search, results=search_results_list[int(page) - 1], page=int(page), total_pages=int(total_pages))
 
@@ -227,28 +248,17 @@ def movie_info(movie_id):
     for person in credits['crew']:
         if person['department'] == 'Directing':
             director.append(person['name'])
-
     ## GET STREAMING SERVICES
     api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key={api_key}").json()
     try:
         stream = api_res['results']['US']['flatrate']
     except:
         stream = []
-    # try:
-    #     buy = api_res['results']['US']['buy']
-    # except:
-    #     buy = []
-    # try:
-    #     rent = api_res['results']['US']['rent']
-    # except:
-    #     rent = []
-
     ## GET LIST OF FAVORITES AND CHECK TO SEE IF MOVIE IS IN USER'S LIST
     favorites = Favorites.query.all()
     ratings = Ratings.query.all()
     user_rating = ''
     favorited = 0
-    print(len(actors))
     if session:
         for rating in ratings:
             if str(rating.user_id) == str(session['id']) and str(rating.movie_id) == str(movie_id):
@@ -282,17 +292,14 @@ def see_reviews(movie_id):
 
 
 ## WRITE REVIEW FOR MOVIE
-@app.route('/write-review/<movie_id>', methods=["GET"])
+@app.route('/write-review/<movie_id>', methods=["GET", "POST"])
 def write_review(movie_id):
-    api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}")
-    movie = api_res.json()
-    return render_template('write-review.html', movie=movie)
-
-
-## ADD REVIEW TO DATABASE
-@app.route('/write-review/<movie_id>', methods=["POST"])
-def submit_review(movie_id):
-    review = request.form['review']
+    form = ReviewForm()
+    if request.method == "GET":
+        api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}")
+        movie = api_res.json()
+        return render_template('write-review.html', movie=movie, form=form)
+    review = form.review.data
     rating = request.form['rating']
     new_rating = Ratings(user_id=session['id'], movie_id=movie_id, rating_score=rating)
     db.session.add(new_rating)
@@ -379,9 +386,9 @@ def your_list():
         if movie.user_id == session['id']:
             fav = requests.get(f"https://api.themoviedb.org/3/movie/{movie.movie_id}?api_key={api_key}&language=en-US").json()
             list.append(fav)
-    s = slice(0,24)
+    s = slice(0,23)
     for movie in list:
-        if len(movie['title'])>25:
+        if len(movie['title'])>24:
             movie['title'] = movie['title'][s] + '..'
     return render_template('your-list.html', movies=list)
 
