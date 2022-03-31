@@ -7,6 +7,7 @@
     {% for t in titles %}
         <h2>{{ t }}:</h2>
         <h3>{{ titles[t] }}</h3>
+        <a href="/delete-review/{{ titles[t] }}"><button>DELETE</button></a>
         <br>
         <br>
     {% endfor %}

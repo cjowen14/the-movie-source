@@ -387,6 +387,32 @@ def your_ratings():
         titles[title] = results[movie]
     return render_template('your-ratings.html', titles=titles)
 
+## DELETE USER RATING
+@app.route('/delete-rating/<movie>')
+def delete_rating(movie):
+    movie_id = requests.get(f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&language=en-US&page=1&include_adult=false&query={movie}").json()['results'][0]['id']
+    rating_id = 0
+    ## FIND RATING_ID TO DELETE 
+    ratings = Ratings.query.all()
+    for rating in ratings:
+        if rating.user_id == session['id'] and rating.movie_id == movie_id:
+            rating_id = rating.rating_id
+    delete_rating = Ratings.query.filter_by(rating_id=rating_id).first()
+    ## SEE IF THERE IS A REVIEW TIED WITH THE RATING AND DELETE THE REVIEW AS WELL
+    if Reviews.query.filter_by(rating_id=rating_id).all():
+        delete_review = Reviews.query.filter_by(rating_id=rating_id).first()
+        db.session.delete(delete_review)
+        db.session.commit()
+        db.session.delete(delete_rating)
+        db.session.commit()
+        flash(f"Rating and review have been deleted!")
+        return redirect(url_for('your_ratings'))
+    db.session.delete(delete_rating)
+    db.session.commit()
+    flash(f"Rating has been deleted!")
+    return redirect(url_for('your_ratings'))
+
+
 
 ## VIEW ALL USER'S REVIEWS
 @app.route('/your-reviews')
@@ -399,9 +425,23 @@ def your_reviews():
             movie = review.movie_id
             results[movie] = review.review
     for movie in results:
-        title = requests.get(f"https://api.themoviedb.org/3/movie/{movie}?api_key={api_key}&language=en-US").json()['title']
-        titles[title] = results[movie]
+        title = requests.get(f"https://api.themoviedb.org/3/movie/{movie}?api_key={api_key}&language=en-US").json()
+        titles[title['title']] = results[movie]
     return render_template('your-reviews.html', titles=titles)
+
+
+## DELETE USER REVIEW (WITH RATING ASSOCIATED WITH IT)
+@app.route('/delete-review/<review>')
+def delete_review(review):
+    delete_review = Reviews.query.filter_by(review=review).first()
+    rating_id = Reviews.query.filter_by(review_id=delete_review.review_id).first().rating_id
+    delete_rating = Ratings.query.filter_by(rating_id=rating_id).first()
+    db.session.delete(delete_review)
+    db.session.commit()
+    db.session.delete(delete_rating)
+    db.session.commit()
+    flash(f"Review and rating have been deleted!")
+    return redirect(url_for('your_reviews'))
 
 
 ## VIEW USER'S LIST
