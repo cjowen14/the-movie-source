@@ -1,6 +1,3 @@
-from operator import methodcaller
-from turtle import update
-from types import MethodType
 from flask import Flask, render_template, request, flash, session, url_for, redirect
 import requests
 import os
