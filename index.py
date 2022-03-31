@@ -1,4 +1,5 @@
 from operator import methodcaller
+from turtle import update
 from types import MethodType
 from flask import Flask, render_template, request, flash, session, url_for, redirect
 import requests
@@ -8,7 +9,7 @@ from passlib.hash import sha256_crypt
 from sqlalchemy import create_engine
 from pprint import pprint
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField, PasswordField
+from wtforms import StringField, TextAreaField, SubmitField, PasswordField, RadioField
 from wtforms.validators import DataRequired, Length, email_validator
 app = Flask(__name__)
 db = SQLAlchemy()
@@ -87,6 +88,12 @@ class LoginForm(FlaskForm):
 ## REVIEW FORM CLASS
 class ReviewForm(FlaskForm):
     review = TextAreaField("Review", validators=[DataRequired()])
+    ratings = RadioField("", choices=[('1', '1'), ('2', '2'),('3', '3'), ('4', '4'),('5', '5'), ('6', '6'),('7', '7'), ('8', '8'),('9', '9'), ('10', '10')])
+    submit = SubmitField("Submit")
+
+## RATING FORM CLASS
+class RatingForm(FlaskForm):
+    ratings = RadioField("", choices=[('1', '1'), ('2', '2'),('3', '3'), ('4', '4'),('5', '5'), ('6', '6'),('7', '7'), ('8', '8'),('9', '9'), ('10', '10')])
     submit = SubmitField("Submit")
 
 
@@ -220,7 +227,6 @@ def search_results2(user_search):
 ## PROCESS NEXT OR PREVIOUS PAGE OF SEARCH RESULTS
 @app.route('/search-results/<user_search>-<page>-<total_pages>')
 def next_search(user_search, page, total_pages):
-    print(page)
     s = slice(0,23)
     for movie in search_results_list[int(page) - 1]:
         if len(movie['title'])>24:
@@ -254,20 +260,24 @@ def movie_info(movie_id):
         stream = api_res['results']['US']['flatrate']
     except:
         stream = []
-    ## GET LIST OF FAVORITES AND CHECK TO SEE IF MOVIE IS IN USER'S LIST
+    ## GET LIST OF FAVORITES, CHECK TO SEE IF MOVIE IS IN USER'S LIST, CHECK TO SEE IF USER HAS RATED AND REVIEWED MOVIE
     favorites = Favorites.query.all()
     ratings = Ratings.query.all()
-    user_rating = ''
+    reviews = Reviews.query.all()
+    user_rating = 0
     favorited = 0
+    reviewed = 0
     if session:
         for rating in ratings:
             if str(rating.user_id) == str(session['id']) and str(rating.movie_id) == str(movie_id):
-                user_rating = rating.rating_score
+                user_rating = int(rating.rating_score)
         for fav in favorites:
             if str(fav.movie_id) == str(movie_id) and str(fav.user_id) == str(session['id']):
                 favorited = movie_id
-                return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, stream=stream, user_rating=user_rating)
-    return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, stream=stream, user_rating=user_rating)
+        for review in reviews:
+            if str(review.movie_id) == str(movie_id) and str(review.user_id) == str(session['id']):
+                reviewed = movie_id
+    return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, stream=stream, user_rating=user_rating, review=reviewed)
 
 
 ## VIEW ALL REVIEWS FOR MOVIE
@@ -295,34 +305,54 @@ def see_reviews(movie_id):
 @app.route('/write-review/<movie_id>', methods=["GET", "POST"])
 def write_review(movie_id):
     form = ReviewForm()
+    reviews = Reviews.query.all()
+    ratings = Ratings.query.all()
     if request.method == "GET":
         api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}")
         movie = api_res.json()
+        for review in reviews:
+            if str(review.movie_id) == str(movie_id) and str(review.user_id) == str(session['id']):
+                form.review.data = review.review
+                form.submit.label.text = "Update"
         return render_template('write-review.html', movie=movie, form=form)
-    review = form.review.data
-    rating = request.form['rating']
-    new_rating = Ratings(user_id=session['id'], movie_id=movie_id, rating_score=rating)
+    new_review = form.review.data
+    new_rating = form.ratings.data
+    for r in reviews:
+        if str(r.movie_id) == str(movie_id) and str(r.user_id) == str(session['id']):
+            r.review = new_review
+            db.session.commit()
+            for rate in ratings:
+                if str(rate.movie_id) == str(movie_id) and str(rate.user_id) == str(session['id']):
+                    rate.rating_score = new_rating
+                    db.session.commit()
+            return redirect(url_for('see_reviews',movie_id=movie_id))
+    new_rating = Ratings(user_id=session['id'], movie_id=movie_id, rating_score=new_rating)
     db.session.add(new_rating)
     db.session.commit()
-    new_review = Reviews(user_id=session['id'], movie_id=movie_id, rating_id=new_rating.rating_id, review=review)
+    new_review = Reviews(user_id=session['id'], movie_id=movie_id, rating_id=new_rating.rating_id, review=new_review)
     db.session.add(new_review)
     db.session.commit()
     return redirect(url_for('see_reviews',movie_id=movie_id))
 
 
-## GIVE JUST A RATING FOR A MOVIE
-@app.route('/rate-movie/<movie_id>', methods=["GET"])
-def rate_movie(movie_id):
-    api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}")
-    movie = api_res.json()
-    return render_template('rate.html', movie=movie)
-
 
 ## ADD THE RATING TO THE DB
-@app.route('/rate-movie/<movie_id>', methods=["POST"])
+@app.route('/rate-movie/<movie_id>', methods=["GET", "POST"])
 def submit_rating(movie_id):
-    rating = request.form['rating']
-    new_rating = Ratings(user_id=session['id'], movie_id=movie_id, rating_score=rating)
+    form = RatingForm()
+    ratings = Ratings.query.all()
+    if request.method == 'GET':
+        api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}")
+        movie = api_res.json()
+        form.submit.label.text = "Update"
+        return render_template('rate.html', movie=movie, form=form)
+    new_rating = form.ratings.data
+    for rate in ratings:
+        if str(rate.movie_id) == str(movie_id) and str(rate.user_id) == str(session['id']):
+            rate.rating_score = new_rating
+            db.session.commit()
+            return redirect(url_for('movie_info', movie_id=movie_id))
+    new_rating = Ratings(user_id=session['id'], movie_id=movie_id, rating_score=new_rating)
     db.session.add(new_rating)
     db.session.commit()
     return redirect(url_for('movie_info', movie_id=movie_id))

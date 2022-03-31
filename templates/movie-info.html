@@ -18,14 +18,21 @@
         <h1 id="movie-title">{{ results['title'] }}</h1>
         {% if session %}
             <a href="/reviews/{{ results['id'] }}"><button class="info-buttons">See All Reviews</button></a>
-
-                {% if favorites %}
-                    <a href="/delete-fav/{{ results['id'] }}"><button class="info-buttons">Remove From List</button></a>
-                {% else %}
-                    <a href="/fav-list/{{ results['id'] }}"><button class="info-buttons">Add to Your List</button></a>
-                {% endif %}
-            <a href="/rate-movie/{{ results['id'] }}"><button class="info-buttons">Rate Movie</button></a>
-            <a href="/write-review/{{ results['id'] }}"><button class="info-buttons last-button">Write A Review</button></a>
+            {% if favorites %}
+                <a href="/delete-fav/{{ results['id'] }}"><button class="info-buttons">Remove From List</button></a>
+            {% else %}
+                <a href="/fav-list/{{ results['id'] }}"><button class="info-buttons">Add to Your List</button></a>
+            {% endif %}
+            {% if user_rating %}
+                <a href="/rate-movie/{{ results['id'] }}"><button class="info-buttons">Update Rating</button></a>
+            {% else %}
+                <a href="/rate-movie/{{ results['id'] }}"><button class="info-buttons">Rate Movie</button></a>
+            {% endif %}
+            {% if review %}
+                <a href="/write-review/{{ results['id'] }}"><button class="info-buttons last-button">Update Review</button></a>
+            {% else %}
+                <a href="/write-review/{{ results['id'] }}"><button class="info-buttons last-button">Write A Review</button></a>
+            {% endif %}
         {% else %}
             <a href="/reviews/{{ results['id'] }}"><button class="info-buttons last-button">See All Reviews</button></a>
         {% endif %}

@@ -5,20 +5,12 @@
     color: white;
 }
 
-/* header{
-    background-color: rgb(30, 30, 30);
-    width: 100%;
-    height: 20px;
-} */
-
-
 footer{
     width: 100%;
     height: 150px;
 }
 
 nav,li{
-    /* background-color: rgb(30, 30, 30); */
     float: right;
     margin-top: 40px;
     margin-right: 50px;
@@ -38,10 +30,7 @@ nav,li{
     height: 150px;
     display: flex;
     padding-top: 20px;
-    /* margin-left: 50px; */
-    /* background-color: rgb(30, 30, 30); */
 }
-
 
 .flash-message{
     text-align: center;
@@ -51,8 +40,8 @@ nav,li{
     color: aqua;
 }
 
-/* HOME PAGE AND SEARCH RESULTS */
 
+/* HOME PAGE AND SEARCH RESULTS */
 .home{
     text-align: center;
 }
@@ -101,7 +90,6 @@ nav,li{
     word-wrap: break-word;
 }
 
-
 .poster{
     width: 100%;
     height: 100%;
@@ -112,8 +100,8 @@ nav,li{
     margin-bottom: 75px;
 }
 
-/* MOVIE INFO */
 
+/* MOVIE INFO */
 .info-div{
     margin-top: 80px;
 }
@@ -195,11 +183,6 @@ nav,li{
 }
 
 
-
-
-
-
-
 /* LOGIN & REGISTER FORMS */
 .login-form{
     width: 500px;
@@ -240,7 +223,6 @@ nav,li{
 
 /* REVIEWS */
 .reviews-table{
-    /* background-color: aqua; */
     text-align: center;
     margin-left: auto;
     margin-right: auto;
@@ -264,9 +246,7 @@ nav,li{
 }
 
 
-
 /* WRITE REVIEW */
-
 .write-review{
     text-align: center;
 }
@@ -282,15 +262,15 @@ nav,li{
     font-size: 20pt;
     width: 800px;
     height: 350px;
+    margin-bottom: 50px;
 }
 
 .review-submit{
     width: 200px;
     height: 50px;
     font-size: 28pt;
+    margin-top: 40px;
 }
-
-
 
 .your-list{
     text-align: center;
@@ -311,4 +291,18 @@ nav,li{
     border: 2px solid aqua;
 }
 
+
+
+/* RATE A MOVIE */
+.rating{
+    background-color: aqua;
+    width: 80px;
+    height: 40px;
+}
+
+.rating-label{
+    color: aqua;
+    margin-right: 50px;
+    font-size: 40pt;
+}
 

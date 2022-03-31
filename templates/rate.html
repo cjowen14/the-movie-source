@@ -6,30 +6,12 @@
     <div class="write-review">
         <h2>What would you rate: {{ movie['title'] }}</h2>
         <form method="POST">
-            <div class="radios">
-                <h2>1</h2>
-                <input type="radio" value="1" name="rating" class="radio-button">
-                <h2>2</h2>
-                <input type="radio" value="2" name="rating" class="radio-button">
-                <h2>3</h2>
-                <input type="radio" value="3" name="rating" class="radio-button">
-                <h2>4</h2>
-                <input type="radio" value="4" name="rating" class="radio-button">
-                <h2>5</h2>
-                <input type="radio" value="5" name="rating" class="radio-button">
-                <h2>6</h2>
-                <input type="radio" value="6" name="rating" class="radio-button">
-                <h2>7</h2>
-                <input type="radio" value="7" name="rating" class="radio-button">
-                <h2>8</h2>
-                <input type="radio" value="8" name="rating" class="radio-button">
-                <h2>9</h2>
-                <input type="radio" value="9" name="rating" class="radio-button">
-                <h2>10</h2>
-                <input type="radio" value="10" name="rating" class="radio-button">
-            </div>
+            {% for value in form.ratings %}
+                {{ value(class="rating") }}
+                {{ value.label(class="rating-label") }}
+            {% endfor %}
             <br>
-            <input type="submit" class="review-submit">
+            {{ form.submit(class="review-submit")}}
         </form>
 </div>
 
