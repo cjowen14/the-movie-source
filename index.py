@@ -277,6 +277,13 @@ def movie_info(movie_id):
     return render_template('movie-info.html', results=results, actors=actors, director=director, favorites=favorited, stream=stream, user_rating=user_rating, review=reviewed)
 
 
+## GET MOVIE ID FROM TITLE
+@app.route('/movie-name/<title>')
+def movie_name(title):
+    movie_id = requests.get(f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&language=en-US&page=1&include_adult=false&query={title}").json()['results'][0]['id']
+    return redirect(url_for('movie_info', movie_id=movie_id))
+
+
 ## VIEW ALL REVIEWS FOR MOVIE
 @app.route('/reviews/<movie_id>')
 def see_reviews(movie_id):

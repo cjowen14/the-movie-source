@@ -4,8 +4,9 @@
 
 {% block content %}
 
+
     {% for t in titles %}
-        <h2>{{ t }}:  {{ titles[t] }}/10</h2>
+        <a href="/movie-name/{{ t }}"><h2>{{ t }}:  {{ titles[t] }}/10</h2></a>
         <a href="/delete-rating/{{ t }}"><button>DELETE</button></a>
         <br>
     {% endfor %}
