@@ -4,24 +4,21 @@
 
 {% block content %}
 
+<a href="/movie-info/{{ movie['id'] }}"><h1 class="reviews-title">Reviews for: {{ movie['title'] }}</h1></a>
 
-<h1 class="reviews-title">Reviews for: {{ movie['title'] }}</h1>
 <div class="reviews-div">
     {% if reviews %}
-        <table class="reviews-table">
-            <tr>
-                <th class="reviews-header">Name</th>
-                <th class="reviews-header">Review</th>
-            </tr>
+        <div class="reviews-page">
             {% for r in reviews %}
-            <tr>
-                <td class="reviews-data">{{ r }}</td>
-                <td class="reviews-data">{{ reviews[r] }}</td>
-            </tr>
+            <div class="review-div">
+                <h2 class="reviews-name">{{ r }}</h2>
+                <p class="reviews-data">{{ reviews[r] }}</p>
+            </div>
             {% endfor %}
-        </table>
+        </div> 
+        
     {% else %}
-        <h2>This movie has no reviews</h2>
+        <h2 class="no-reviews">This movie has no reviews</h2>
     {% endif %}
 </div>
 

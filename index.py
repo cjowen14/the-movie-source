@@ -1,3 +1,4 @@
+from typing import final
 from flask import Flask, render_template, request, flash, session, url_for, redirect
 import requests
 import os
@@ -264,7 +265,7 @@ def movie_info(movie_id):
     user_rating = 0
     favorited = 0
     reviewed = 0
-    if session:
+    if 'id' in session:
         for rating in ratings:
             if str(rating.user_id) == str(session['id']) and str(rating.movie_id) == str(movie_id):
                 user_rating = int(rating.rating_score)
@@ -289,6 +290,8 @@ def movie_name(title):
 def see_reviews(movie_id):
     reviews = Reviews.query.all()
     users = User.query.all()
+    rating_list = []
+    final_ratings = [] 
     review_dict = {}
     final_dict = {}
     api_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}")
@@ -296,12 +299,17 @@ def see_reviews(movie_id):
     ##  GET REVIEWS FOR MOVIE
     for review in reviews:
         if str(review.movie_id) == str(movie_id):
+            rating_list.append(review.rating_id)
             review_dict[review.user_id] = review.review
+    for r in rating_list:
+        final_ratings.append(Ratings.query.filter_by(rating_id=r).first())
     ## GET USER NAMES ASSOCIATED WITH EACH REVIEW
+    i=0
     for review in review_dict:
         for user in users:
             if review == user.user_id:
-                final_dict[user.user_first_name + " " + user.user_last_name] = review_dict[review]
+                final_dict[user.user_first_name + " " + user.user_last_name + " - " + str(final_ratings[i].rating_score)+ "/10"] = review_dict[review]
+                i += 1
     return render_template('reviews.html', reviews=final_dict, movie=movie)
 
 

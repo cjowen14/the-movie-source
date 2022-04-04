@@ -4,14 +4,21 @@
 
 {% block content %}
 
-
-    {% for t in titles %}
-        <a href="/movie-name/{{ t }}"><h2>{{ t }}:  {{ titles[t] }}/10</h2></a>
-        <a href="/delete-rating/{{ t }}"><button>DELETE</button></a>
-        <br>
-    {% endfor %}
-
-
+    <h1 class="reviews-title">Your Ratings</h1>
+    <div class="reviews-div">
+        {% if titles %}
+            <div class="reviews-page">
+                {% for t in titles %}
+                <a href="/movie-name/{{ t }}" class="reviews-name ratings-name"><h2 class="reviews-name ratings-name">{{ t }}: {{titles[t] }}/10</h2></a>
+                <a href="/delete-rating/{{ t }}" class="delete-review delete-rating">DELETE</a>
+                <br>
+                <br>
+                {% endfor %}
+            </div>
+        {% else %}
+            <h2 class="no-reviews">You currently have no ratings</h2>
+        {% endif %}
+    </div>
 
 
 {% endblock %}
