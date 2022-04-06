@@ -39,6 +39,10 @@ nav,li{
     color: aqua;
 }
 
+a{
+    text-decoration: none;
+}
+
 
 /* HOME PAGE AND SEARCH RESULTS */
 .home{
@@ -103,23 +107,81 @@ nav,li{
 /* MOVIE INFO */
 .info-div{
     margin-top: 80px;
+    display: flex;
 }
 
 #movie-title{
-    font-size: 50pt;
+    font-size: 45pt;
+}
+
+.image-div{
+    width: 47%;
+    margin-right: 20px;
+}
+
+.info-ratings{
+    width: 35%;
     text-align: center;
 }
 
 .info-poster{
-    width: 400px;
-    height: 550px;
-    float: left;
-    margin-top: 10px;
-    margin-right: 50px;
+    width: 350px;
+    height: 500px;
+    float: right;
 }
 
-.movie-info{
-    margin-left: 1000px;
+.stream-header{
+    color: white;
+}
+
+.info-buttons{
+    width: 200px;
+    height: 50px;
+    font-size: 16pt;
+    margin: 8px;
+    margin-top: 0;
+    border: 4px solid aqua;
+    text-align: center;
+}
+
+.last-button{
+    margin-bottom: 40px;
+}
+
+.service-logo{
+    width: 80px;
+    height: 80px;
+    margin-right: 20px;
+    margin-top: 10px;
+}
+
+.not-available{
+    width: 150px;
+    margin-top: 30px;
+}
+
+.streaming{
+    width: 70%;
+    margin-left: 15%;
+}
+
+.movie-info-div{
+    display: flex;
+    margin-top: 50px;
+}
+
+.movie-info-1{
+    column-count: 1;
+    column-gap: 5px;
+    width: 25%;
+    margin-left: 30%;
+
+}
+
+.movie-info-2{
+    column-count: 1;
+    column-gap: 5px;
+    width: 25%;
 }
 
 .info-info{
@@ -132,54 +194,21 @@ nav,li{
     font-weight: bolder;
     font-size: 22pt;
     text-decoration: underline;
+    margin-bottom: 2px;
 }
 
-.stream-header{
-    color: white;
-}
-
-.info-ratings{
-    margin-top: 0px;
-    float: left;
-    width: 500px;
-    text-align: center;
-}
-
-.info-buttons{
-    width: 200px;
-    height: 50px;
-    font-size: 16pt;
-    margin-top: 8px;
-    border: 4px solid aqua;
-    text-align: center;
-}
-
-.last-button{
-    margin-bottom: 40px;
-}
-
-.service-logo{
-    width: 100px;
-    height: 100px;
-    margin: 5px;
-}
-
-.not-available{
-    width: 150px;
-}
-
-.streaming{
-    text-align: center;
+.synopsis-div{
     margin-top: 20px;
+    width: 70%;
+    margin-left: 15%;
+    text-align: center;
 }
 
-.streaming>h2{
-    margin-top: 20px;
+.synopsis{
+    margin-bottom: 8px;
 }
 
-.service-div{
-    margin-top: 10px;
-}
+
 
 
 /* LOGIN & REGISTER FORMS */

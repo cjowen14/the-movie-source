@@ -11,59 +11,60 @@
         </form>
     </div>
     <div class="info-div">
-
-    
-    <img src="https://image.tmdb.org/t/p/original/{{ results['poster_path'] }}" class="info-poster">
-    <div class="info-ratings">
-        <h1 id="movie-title">{{ results['title'] }}</h1>
-        {% if session %}
-            <a href="/reviews/{{ results['id'] }}"><button class="info-buttons">See All Reviews</button></a>
-            {% if favorites %}
-                <a href="/delete-fav/{{ results['id'] }}"><button class="info-buttons">Remove From List</button></a>
-            {% else %}
-                <a href="/fav-list/{{ results['id'] }}"><button class="info-buttons">Add to Your List</button></a>
-            {% endif %}
-            {% if user_rating %}
-                <a href="/rate-movie/{{ results['id'] }}"><button class="info-buttons">Update Rating</button></a>
-            {% else %}
-                <a href="/rate-movie/{{ results['id'] }}"><button class="info-buttons">Rate Movie</button></a>
-            {% endif %}
-            {% if review %}
-                <a href="/write-review/{{ results['id'] }}"><button class="info-buttons last-button">Update Review</button></a>
-            {% else %}
-                <a href="/write-review/{{ results['id'] }}"><button class="info-buttons last-button">Write A Review</button></a>
-            {% endif %}
-        {% else %}
-            <a href="/reviews/{{ results['id'] }}"><button class="info-buttons last-button">See All Reviews</button></a>
-        {% endif %}
-
-        <div class="streaming">
-            <h2 class="info-header stream-header">Stream with Subscription:</h2>
-            {% if stream %}
-                <div class="service-div">
-                    {% for service in stream %} 
-                        <img src="https://image.tmdb.org/t/p/original/{{service['logo_path']}}" class="service-logo">
-                    {% endfor %}
-                </div>
-            {% else %}
-            <img src="../static/images/na.png" class="not-available">
-            {% endif %}
+        <div class="image-div"><img src="https://image.tmdb.org/t/p/original/{{ results['poster_path'] }}" class="info-poster"></div>
+        <div class="info-ratings">
+            <h1 id="movie-title">{{ results['title'] }}</h1>
+            <div class="buttons-div">
+                {% if session ['email'] %}
+                    <a href="/reviews/{{ results['id'] }}"><button class="info-buttons">See All Reviews</button></a>
+                    {% if favorites %}
+                        <a href="/delete-fav/{{ results['id'] }}"><button class="info-buttons">Remove From List</button></a>
+                    {% else %}
+                        <a href="/fav-list/{{ results['id'] }}"><button class="info-buttons">Add to Your List</button></a>
+                    {% endif %}
+                    {% if user_rating %}
+                        <a href="/rate-movie/{{ results['id'] }}"><button class="info-buttons">Update Rating</button></a>
+                    {% else %}
+                        <a href="/rate-movie/{{ results['id'] }}"><button class="info-buttons">Rate Movie</button></a>
+                    {% endif %}
+                    {% if review %}
+                        <a href="/write-review/{{ results['id'] }}"><button class="info-buttons last-button">Update Review</button></a>
+                    {% else %}
+                        <a href="/write-review/{{ results['id'] }}"><button class="info-buttons last-button">Write A Review</button></a>
+                    {% endif %}
+                {% else %}
+                    <a href="/reviews/{{ results['id'] }}"><button class="info-buttons last-button">See All Reviews</button></a>
+                {% endif %}
+            </div>   
+            <div class="streaming">
+                <h2 class="info-header stream-header">Stream with Subscription:</h2>
+                {% if stream %}
+                    <div class="service-div">
+                        {% for service in stream %} 
+                            <img src="https://image.tmdb.org/t/p/original/{{service['logo_path']}}" class="service-logo">
+                        {% endfor %}
+                    </div>
+                {% else %}
+                <img src="../static/images/na.png" class="not-available">
+                {% endif %}
+            </div>
         </div>
-        
-
     </div>
 
-    <div class="movie-info">
-            {% if session['email'] %}
-                {% if user_rating %}
-                    <h2 class="info-header">Your Rating:</h2><h3 class="info-info">{{ user_rating }}</h3>
-                {% else %}
-                    <h2 class="info-header">Your Rating:</h2><h3 class="info-info">You have not rated this movie</h3>
-                {% endif %}
+    <div class="movie-info-div">
+    <div class="movie-info-1">
+        {% if session['email'] %}
+            {% if user_rating %}
+                <h2 class="info-header">Your Rating:</h2><h3 class="info-info">{{ user_rating }}</h3>
+            {% else %}
+                <h2 class="info-header">Your Rating:</h2><h3 class="info-info">You have not rated this movie</h3>
             {% endif %}
-            <h2 class="info-header">Average Rating:</h2><h3 class="info-info">{{ results['vote_average'] }}</h3>
-            <h2 class="info-header">Release Date:</h2><h3 class="info-info">{{ results['release_date'] }}</h3>
-            <h2 class="info-header">Director:</h2><h3 class="info-info">{{ director[0] }}</h3>
+        {% endif %}
+        <h2 class="info-header">Average Rating:</h2><h3 class="info-info">{{ results['vote_average'] }}</h3>
+        <h2 class="info-header">Release Date:</h2><h3 class="info-info">{{ results['release_date'] }}</h3>
+        <h2 class="info-header">Director:</h2><h3 class="info-info">{{ director[0] }}</h3>
+    </div>
+    <div class="movie-info-2">
             <h2 class="info-header">Studios:</h2><h3 class="info-info">
                 {% for company in results['production_companies'] %}
                     {% if results['production_companies'].index(company) < results['production_companies']|length-1 %}
@@ -90,14 +91,12 @@
                         {{ actor }}
                     {% endif %}
                 {% endfor %}
-                
             </h3>
-            <h2 class="info-header">Runtime:</h2><h3 class="info-info">{{ results['runtime'] }} minutes</h3>
-            
-            <h2 class="info-header">Synopsis:</h2><h3 class="info-info">{{ results['overview'] }}</h3> 
+        <h2 class="info-header">Runtime:</h2><h3 class="info-info">{{ results['runtime'] }} minutes</h3>
     </div>
-
-</div>
+    </div>
+    <div class="synopsis-div"><h2 class="info-header synopsis">Synopsis:</h2><h3 class="info-info">{{ results['overview'] }}</h3></div>
+    
 
 
 

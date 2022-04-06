@@ -1,9 +1,50 @@
-{% extends 'base.html' %}
+<div class="movie-info">
+    {% if session['email'] %}
+        {% if user_rating %}
+            <div class="info-div"><h2 class="info-header">Your Rating:</h2><h3 class="info-info">{{ user_rating }}</h3></div>
+        {% else %}
+            <div class="info-div"><h2 class="info-header">Your Rating:</h2><h3 class="info-info">You have not rated this movie</h3></div>
+        {% endif %}
+    {% endif %}
+    <div class="info-div"><h2 class="info-header">Average Rating:</h2><h3 class="info-info">{{ results['vote_average'] }}</h3></div>
+    <div class="info-div"><h2 class="info-header">Release Date:</h2><h3 class="info-info">{{ results['release_date'] }}</h3></div>
+    <div class="info-div"><h2 class="info-header">Director:</h2><h3 class="info-info">{{ director[0] }}</h3></div>
+    <div class="info-div">
+        <h2 class="info-header">Studios:</h2><h3 class="info-info">
+            {% for company in results['production_companies'] %}
+                {% if results['production_companies'].index(company) < results['production_companies']|length-1 %}
+                    {{ company['name'] }}, 
+                {% else %}
+                    {{ company['name'] }}
+                {% endif %}
+            {% endfor %}
+        </h3>
+    </div>
+    <div class="info-div">
+        <h2 class="info-header">Genres:</h2><h3 class="info-info">
+            {% for genre in results['genres'] %}
+                {% if results['genres'].index(genre) < results['genres']|length-1 %}
+                    {{ genre['name'] }}, 
+                {% else %}
+                    {{ genre['name'] }}
+                {% endif %}
+            {% endfor %}
+        </h3>
+    </div>
+    <div class="info-div">
+        <h2 class="info-header">Starring:</h2><h3 class="info-info">
+            {% for actor in actors %}
+                {% if actors.index(actor) < actors|length-1 %}
+                    {{ actor }}, 
+                {% else %}
+                    {{ actor }}
+                {% endif %}
+            {% endfor %}
+            
+        </h3>
+    </div>
+    <div class="info-div"><h2 class="info-header">Runtime:</h2><h3 class="info-info">{{ results['runtime'] }} minutes</h3></div>
+    <div class="info-div"><h2 class="info-header">Synopsis:</h2><h3 class="info-info">{{ results['overview'] }}</h3></div>
+     
 
-{% block title %} TEST {% endblock %}
-
-{% block content %}
-
-
-
-{% endblock %}
+</div>
