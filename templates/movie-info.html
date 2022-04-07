@@ -63,9 +63,7 @@
         <h2 class="info-header">Average Rating:</h2><h3 class="info-info">{{ results['vote_average'] }}</h3>
         <h2 class="info-header">Release Date:</h2><h3 class="info-info">{{ results['release_date'] }}</h3>
         <h2 class="info-header">Director:</h2><h3 class="info-info">{{ director[0] }}</h3>
-    </div>
-    <div class="movie-info-2">
-            <h2 class="info-header">Studios:</h2><h3 class="info-info">
+            <!-- <h2 class="info-header">Studios:</h2><h3 class="info-info">
                 {% for company in results['production_companies'] %}
                     {% if results['production_companies'].index(company) < results['production_companies']|length-1 %}
                         {{ company['name'] }}, 
@@ -73,7 +71,9 @@
                         {{ company['name'] }}
                     {% endif %}
                 {% endfor %}
-            </h3>
+            </h3> -->
+        </div>
+        <div class="movie-info-2">
             <h2 class="info-header">Genres:</h2><h3 class="info-info">
                 {% for genre in results['genres'] %}
                     {% if results['genres'].index(genre) < results['genres']|length-1 %}
