@@ -11,6 +11,7 @@
                 {% for t in titles %}
                 <a href="/movie-name/{{ t }}" class="reviews-name ratings-name"><h2 class="reviews-name ratings-name">{{ t }}: {{titles[t] }}/10</h2></a>
                 <a href="/delete-rating/{{ t }}" class="delete-review delete-rating">DELETE</a>
+                <a href="/rate-movie/{{ movie_id[loop.index - 1] }}" class="delete-review delete-rating">UPDATE</a>
                 <br>
                 <br>
                 {% endfor %}

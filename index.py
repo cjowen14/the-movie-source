@@ -393,6 +393,7 @@ def your_ratings():
     ratings = Ratings.query.all()
     results = {}
     titles={}
+    movie_id = []
     for rating in ratings:
         if rating.user_id == session['id']:
             movie = rating.movie_id
@@ -400,7 +401,8 @@ def your_ratings():
     for movie in results:
         title = requests.get(f"https://api.themoviedb.org/3/movie/{movie}?api_key={api_key}&language=en-US").json()['title']
         titles[title] = results[movie]
-    return render_template('your-ratings.html', titles=titles)
+        movie_id.append(movie)
+    return render_template('your-ratings.html', titles=titles, movie_id=movie_id)
 
 ## DELETE USER RATING
 @app.route('/delete-rating/<movie>')
@@ -435,6 +437,7 @@ def your_reviews():
     reviews= Reviews.query.all()
     results = {}
     titles={}
+    movie_id = []
     for review in reviews:
         if review.user_id == session['id']:
             movie = review.movie_id
@@ -442,7 +445,8 @@ def your_reviews():
     for movie in results:
         title = requests.get(f"https://api.themoviedb.org/3/movie/{movie}?api_key={api_key}&language=en-US").json()
         titles[title['title']] = results[movie]
-    return render_template('your-reviews.html', titles=titles)
+        movie_id.append(movie)
+    return render_template('your-reviews.html', titles=titles, movie_id=movie_id)
 
 
 ## DELETE USER REVIEW (WITH RATING ASSOCIATED WITH IT)

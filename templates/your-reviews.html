@@ -12,6 +12,7 @@
                 <a href="/movie-name/{{ t }}" class="reviews-name"><h2 class="reviews-name">{{ t }}:</h2></a>
                 <p class="reviews-data">{{ titles[t] }}</p>
                 <a href="/delete-review/{{ titles[t] }}" class="delete-review">DELETE</a>
+                <a href="/write-review/{{ movie_id[loop.index - 1] }}" class="delete-review">UPDATE</a>
                 <br>
                 <br>
                 {% endfor %}
